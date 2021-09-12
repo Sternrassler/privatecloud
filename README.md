@@ -40,10 +40,11 @@ sudo reboot
 - Test Knoten: ``sudo kubectl get node``
 - Uninstall: ``/usr/local/bin/k3s-uninstall.sh``
 - Cluster-Konfiguration: ``sudo cat /etc/rancher/k3s/k3s.yaml``
+- Access with ``kubectl`` without admin rights: ``sudo chmod 644 /etc/rancher/k3s/k3s.yaml``
 
 ### Installation Worker
 
-- Token zeigen: ``sudo cat /var/lib/rancher/k3s/server/node-token``
+- Show token: ``sudo cat /var/lib/rancher/k3s/server/node-token``
 - Installation: ``curl -sfL https://get.k3s.io | K3S_URL=https://192.168.0.101:6443 K3S_TOKEN=K10204ddc089cfe0f49f9b69ae5e410fcb626a69cacedd3f0ec9ae0d51af1c80125::server:fd8c7f492b9e72e5c64453c9673938e6 sh -``
 - Uninstall: ``/usr/local/bin/k3s-agent-uninstall.sh``
 
@@ -54,42 +55,30 @@ GITHUB_URL=https://github.com/kubernetes/dashboard/releases
 VERSION_KUBE_DASHBOARD=$(curl -w '%{url_effective}' -I -L -s -S ${GITHUB_URL}/latest -o /dev/null | sed -e 's|.*/||')
 sudo k3s kubectl create -f https://raw.githubusercontent.com/kubernetes/dashboard/${VERSION_KUBE_DASHBOARD}/aio/deploy/recommended.yaml
 
-# Rollen und Benutzer anlegen
+# Create roles and users
 kubectl create -f dashboard.admin-user.yml -f dashboard.admin-user-role.yml
-# Token holen
+# Get tokens
 kubectl -n kubernetes-dashboard describe secret admin-user-token | grep '^token'
-# Dahsboard exposen
+# Expose Dahsboard
 kubectl proxy
 ```
 
-## Installieren [Prometheus](https://sysdig.com/blog/kubernetes-monitoring-prometheus/)
+## Install [Prometheus-Operator](https://prometheus-operator.dev/docs/prologue/quick-start/)
 
-```sh
-# Installation
-helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-helm repo add stable https://kubernetes-charts.storage.googleapis.com/
-helm repo update
-# Prometheus-Server exposen (http://r1.local:9090/targets)
-export POD_NAME=$(sudo kubectl get pods --namespace prometheus -l "app=prometheus,component=server" -o jsonpath="{.items[0].metadata.name}")
-sudo kubectl --namespace prometheus port-forward $POD_NAME 9090 --address=0.0.0.0
-# Prometheus-Alertmanager exposen (http://r1.local:9093)
-export POD_NAME=$(sudo kubectl get pods --namespace prometheus -l "app=prometheus,component=alertmanager" -o jsonpath="{.items[0].metadata.name}")
-sudo kubectl --namespace prometheus port-forward $POD_NAME 9093 --address=0.0.0.0
+- ``sudo kubectl -n monitoring port-forward svc/prometheus-k8s 9090 --address 0.0.0.0``
+- [Prometheus-Dashboard](http://r1:9090/targets)
+- ``sudo kubectl -n monitoring port-forward svc/alertmanager-main 9093 --address 0.0.0.0``
+- [Alert Manager](http://r1:9093/)
+- ``kubectl -n monitoring port-forward svc/grafana 3000 --address 0.0.0.0``
 
-# The Prometheus PushGateway can be accessed via port 9091 on the following DNS name from within your cluster:
-#       prometheus-pushgateway.prometheus.svc.cluster.local
-# Prometheus-PushGateway exposen: (http://r1.local:9091)
-export POD_NAME=$(sudo kubectl get pods --namespace prometheus -l "app=prometheus,component=pushgateway" -o jsonpath="{.items[0].metadata.name}")
-sudo kubectl --namespace prometheus port-forward $POD_NAME 9091 --address=0.0.0.0
-```
-
-## Installieren Grafana auf lokalen Docker
+## Install Grafana on local Docker
 
 - ``docker run -d -p 3000:3000 --name grafana grafana/grafan``
 
-## Installieren Docker für ARM-Builds
+## Install Tools for ARM Docker Builds
 
-- Installation: ``curl -fsSL https://get.docker.com | sh``
+- Installation Docker: ``curl -fsSL https://get.docker.com | sh``
+- Installation NodeJs 14.x: ``curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -``
 
 <!-- 
 ## Installation MicroK8s
