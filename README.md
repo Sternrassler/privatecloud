@@ -61,6 +61,8 @@ kubectl create -f dashboard.admin-user.yml -f dashboard.admin-user-role.yml
 kubectl -n kubernetes-dashboard describe secret admin-user-token | grep '^token'
 # Expose Dahsboard
 kubectl proxy
+# Browser Link
+http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#/workloads?namespace=_all
 ```
 
 ## Install Tools for ARM Docker Builds
@@ -74,3 +76,37 @@ kubectl proxy
 Follow [this](https://ubuntu.com/tutorials/how-to-kubernetes-cluster-on-raspberry-pi#4-installing-microk8s) guide.
 
 ``microk8s join 192.168.0.101:25000/d1c352ae6828699ececb08cdca9720e9/de7fca24feb5`` -->
+
+## Boinc
+
+```sh
+sudo apt install boinc -y
+# added 192.168.0.4 to /var/lib/boinc-client/remote_hosts.cfg
+sudo nano /var/lib/boinc-client/remote_hosts.cfg
+# restart boinc
+sudo /etc/init.d/boinc-client restart
+```
+
+## Measurement temperature, CPU frequency etc.
+
+- Lade Library: ``sudo apt install libraspberrypi-bin -y``
+
+```sh
+#!/bin/bash
+Counter=14
+DisplayHeader="Time       Temp     CPU     Core         Health           Vcore"
+while true ; do
+  let ++Counter
+  if [ ${Counter} -eq 15 ]; then
+    echo -e "${DisplayHeader}"
+    Counter=0
+  fi
+  Health=$(perl -e "printf \"%19b\n\", $(vcgencmd get_throttled | cut -f2 -d=)")
+  Temp=$(vcgencmd measure_temp | cut -f2 -d=)
+  Clockspeed=$(vcgencmd measure_clock arm | awk -F"=" '{printf ("%0.0f",$2/1000000); }' )
+  Corespeed=$(vcgencmd measure_clock core | awk -F"=" '{printf ("%0.0f",$2/1000000); }' )
+  CoreVolt=$(vcgencmd measure_volts | cut -f2 -d= | sed 's/000//')
+  echo -e "$(date '+%H:%M:%S')  ${Temp}  $(printf '%4s' ${Clockspeed})MHz $(printf '%4s' ${Corespeed})MHz  $(printf '%020u' ${Health})  ${CoreVolt}"
+  sleep 10
+done
+```
