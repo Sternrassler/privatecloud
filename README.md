@@ -63,18 +63,6 @@ kubectl -n kubernetes-dashboard describe secret admin-user-token | grep '^token'
 kubectl proxy
 ```
 
-## Install [Prometheus-Operator](https://prometheus-operator.dev/docs/prologue/quick-start/)
-
-- ``sudo kubectl -n monitoring port-forward svc/prometheus-k8s 9090 --address 0.0.0.0``
-- [Prometheus-Dashboard](http://r1:9090/targets)
-- ``sudo kubectl -n monitoring port-forward svc/alertmanager-main 9093 --address 0.0.0.0``
-- [Alert Manager](http://r1:9093/)
-- ``kubectl -n monitoring port-forward svc/grafana 3000 --address 0.0.0.0``
-
-## Install Grafana on local Docker
-
-- ``docker run -d -p 3000:3000 --name grafana grafana/grafan``
-
 ## Install Tools for ARM Docker Builds
 
 - Installation Docker: ``curl -fsSL https://get.docker.com | sh``
