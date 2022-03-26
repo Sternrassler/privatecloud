@@ -45,7 +45,7 @@ sudo reboot
 ### Installation Worker
 
 - Show token: ``sudo cat /var/lib/rancher/k3s/server/node-token``
-- Installation: ``curl -sfL https://get.k3s.io | K3S_URL=https://192.168.0.101:6443 K3S_TOKEN=K10204ddc089cfe0f49f9b69ae5e410fcb626a69cacedd3f0ec9ae0d51af1c80125::server:fd8c7f492b9e72e5c64453c9673938e6 sh -``
+- Installation: ``curl -sfL https://get.k3s.io | K3S_URL=https://192.168.0.101:6443 K3S_TOKEN=K109c3fafa99d1c50187fb49a930299b8049fcb026efe717a2777b6cbbcd82682dd::server:ea85a81e64db4fbca4e60d4655e3d0d5 sh -``
 - Uninstall: ``/usr/local/bin/k3s-agent-uninstall.sh``
 
 ## Installation Dashboard

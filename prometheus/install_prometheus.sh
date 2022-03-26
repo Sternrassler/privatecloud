@@ -48,6 +48,11 @@ scrape_configs:
     scrape_interval: 5s
     static_configs:
       - targets: ['r4:9100']
+  - job_name: 'traefik'
+    scrape_interval: 5s
+    metrics_path: /traefik/metrics
+    static_configs:
+      - targets: ['r1:80']
 EOF
 # Set ownership of prometheus.yml file for prometheus user
 chown prometheus:prometheus /etc/prometheus/prometheus.yml
