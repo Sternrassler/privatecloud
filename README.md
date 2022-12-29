@@ -116,3 +116,5 @@ done
 1. Installation Node Exporter [here](node_exporter\node_exporter.md), Aufruf mit: http://r1.box:9100/metrics
 2. install Prometheus Server [here](prometheus\prometheus.md), call with: http://r1.box:9090
 3. install Grafana Server [here](grafana\grafana.md), call with: http://r1.box:3000
+
+## [smarter-device-manager](smarter-device-manager.md)
