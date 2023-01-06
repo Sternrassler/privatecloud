@@ -17,14 +17,14 @@ Private Kubernetes Cloud based on Rasperry Pi 4
 
 ## Installation K3S
 
-### Vorbereitung Installation K3S
+### Preparation Installation K3S
 
-Auf jeden Raspberry Pi, auf dem K3S installiert werden soll sind folgende Änderungen vorzunehmen:
+On each Raspberry Pi on which K3S is to be installed, the following changes must be made:
 
 ```sh
-# IPTABLES aktivieren
+# IPTABLES activate
 sudo iptables -F && sudo update-alternatives --set iptables /usr/sbin/iptables-legacy && sudo update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
-# CGROUP aktivieren
+# CGROUP activate
 # dabei die eine exestierende Zeile um folgenden Eintrag am Zeilenende ergänzen
 #         cgroup_memory=1 cgroup_enable=memory
 sudo nano /boot/cmdline.txt
@@ -32,7 +32,7 @@ sudo nano /boot/cmdline.txt
 sudo reboot
 ```
 
-### Installation ersten Master
+### Installation first master
 
 - Installation: ``curl -sfL https://get.k3s.io | sh -``
 - Test Version: ``sudo kubectl version``
@@ -44,8 +44,8 @@ sudo reboot
 
 ### Installation Worker
 
-- Show token: ``sudo cat /var/lib/rancher/k3s/server/node-token``
-- Installation: ``curl -sfL https://get.k3s.io | K3S_URL=https://192.168.0.101:6443 K3S_TOKEN=K109c3fafa99d1c50187fb49a930299b8049fcb026efe717a2777b6cbbcd82682dd::server:ea85a81e64db4fbca4e60d4655e3d0d5 sh -``
+- Show token on master node: ``sudo cat /var/lib/rancher/k3s/server/node-token``
+- Installation: ``curl -sfL https://get.k3s.io | K3S_URL=https://192.168.0.101:6443 K3S_TOKEN=K10679d86ff477d75e28bf3e2db42e34d0a6f6d9186b816fe80288f401fbb020804::server:7ded4bc2e1234491ea7c07173ecefff9 sh -``
 - Uninstall: ``/usr/local/bin/k3s-agent-uninstall.sh``
 
 ## Installation Dashboard
@@ -57,64 +57,64 @@ sudo k3s kubectl create -f https://raw.githubusercontent.com/kubernetes/dashboar
 
 # Create roles and users
 kubectl create -f dashboard.admin-user.yml -f dashboard.admin-user-role.yml
-# Get tokens
-kubectl -n kubernetes-dashboard describe secret admin-user-token | grep '^token'
 # Expose Dahsboard
 kubectl proxy
 # Browser Link
 http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#/workloads?namespace=_all
+# Get Token
+kubectl -n kubernetes-dashboard create token admin-user
 ```
 
-## Install Tools for ARM Docker Builds
+## Installation Traefik Ingress Controller Dashboard
 
-- Installation Docker: ``curl -fsSL https://get.docker.com | sh``
-- Installation NodeJs 14.x: ``curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -``
-
-<!-- 
-## Installation MicroK8s
-
-Follow [this](https://ubuntu.com/tutorials/how-to-kubernetes-cluster-on-raspberry-pi#4-installing-microk8s) guide.
-
-``microk8s join 192.168.0.101:25000/d1c352ae6828699ececb08cdca9720e9/de7fca24feb5`` -->
-
-## Boinc
+TODO: SSL Einrichten
 
 ```sh
-sudo apt install boinc -y
-# added 192.168.0.4 to /var/lib/boinc-client/remote_hosts.cfg
-sudo nano /var/lib/boinc-client/remote_hosts.cfg
-# restart boinc
-sudo /etc/init.d/boinc-client restart
+# Add dashboard entry to HELM chart
+sudo nano /var/lib/rancher/k3s/server/manifests/traefik.yaml
+# as follows
+spec:
+  chart: https://%{KUBERNETES_API}%/static/charts/traefik-1.81.0.tgz
+  set:
+    rbac.enabled: "true"
+    ssl.enabled: "true"
+    metrics.prometheus.enabled: "true"
+    kubernetes.ingressEndpoint.useDefaultPublishedService: "true"
+    image: "rancher/library-traefik"
+    dashboard.enabled: "true"        # <-- add this line
+    dashboard.domain: "your domain"  # <-- add this line
+# HELM automatically detects the change and performs all necessary actions
+# Enable the dashboard route
+kubectl apply -f ingress-traefik/traefik-dashbord.yml
+# The dashboard can now be accessed with http://your domain/dashboard/ (the slash at the end must be included)
 ```
 
-## Measurement temperature, CPU frequency etc.
+## Measurement temperature, CPU frequency etc
 
-- Lade Library: ``sudo apt install libraspberrypi-bin -y``
+- Load Library: ``sudo apt install libraspberrypi-bin -y``
+- Create``measure.sh``:
 
-```sh
-#!/bin/bash
-Counter=14
-DisplayHeader="Time       Temp     CPU     Core         Health           Vcore"
-while true ; do
-  let ++Counter
-  if [ ${Counter} -eq 15 ]; then
-    echo -e "${DisplayHeader}"
-    Counter=0
-  fi
-  Health=$(perl -e "printf \"%19b\n\", $(vcgencmd get_throttled | cut -f2 -d=)")
-  Temp=$(vcgencmd measure_temp | cut -f2 -d=)
-  Clockspeed=$(vcgencmd measure_clock arm | awk -F"=" '{printf ("%0.0f",$2/1000000); }' )
-  Corespeed=$(vcgencmd measure_clock core | awk -F"=" '{printf ("%0.0f",$2/1000000); }' )
-  CoreVolt=$(vcgencmd measure_volts | cut -f2 -d= | sed 's/000//')
-  echo -e "$(date '+%H:%M:%S')  ${Temp}  $(printf '%4s' ${Clockspeed})MHz $(printf '%4s' ${Corespeed})MHz  $(printf '%020u' ${Health})  ${CoreVolt}"
-  sleep 10
-done
-```
-
-## Prometheus und Grafana
-
-1. Installation Node Exporter [here](node_exporter\node_exporter.md), Aufruf mit: http://r1.box:9100/metrics
-2. install Prometheus Server [here](prometheus\prometheus.md), call with: http://r1.box:9090
-3. install Grafana Server [here](grafana\grafana.md), call with: http://r1.box:3000
+    ```sh
+    #!/bin/bash
+    Counter=14
+    DisplayHeader="Time       Temp     CPU     Core         Health           Vcore"
+    while true ; do
+      let ++Counter
+      if [ ${Counter} -eq 15 ]; then
+        echo -e "${DisplayHeader}"
+        Counter=0
+      fi
+      Health=$(perl -e "printf \"%19b\n\", $(vcgencmd get_throttled | cut -f2 -d=)")
+      Temp=$(vcgencmd measure_temp | cut -f2 -d=)
+      Clockspeed=$(vcgencmd measure_clock arm | awk -F"=" '{printf ("%0.0f",$2/1000000); }' )
+      Corespeed=$(vcgencmd measure_clock core | awk -F"=" '{printf ("%0.0f",$2/1000000); }' )
+      CoreVolt=$(vcgencmd measure_volts | cut -f2 -d= | sed 's/000//')
+      echo -e "$(date '+%H:%M:%S')  ${Temp}  $(printf '%4s' ${Clockspeed})MHz $(printf '%4s' ${Corespeed})MHz  $(printf '%020u' ${Health})  ${CoreVolt}"
+      sleep 10
+    done
+    ```
 
 ## [smarter-device-manager](smarter-device-manager.md)
+
+## [alternative k8s](https://anthonynsimon.com/blog/kubernetes-cluster-raspberry-pi/)
+
