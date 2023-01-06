@@ -1,0 +1,80 @@
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   annotations:
+#     kubernetes.io/ingress.class: "traefik"
+#   name: whoami-ingress
+#   namespace: default
+# spec:
+#   rules:
+#   - host: r1.box
+#     http:
+#       paths:
+#       - path: /
+#         pathType: Prefix
+#         backend:
+#           service:
+#             name: whoami
+#             port:
+#               name: web
+# ---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: whoami-ingress-route
+  namespace: default
+spec:  
+  entryPoints:
+    - websecure
+  routes:
+  - match: Host(`r1.navida.dev`) && PathPrefix(`/whoami`)
+    kind: Rule
+    services:
+    - kind: Service
+      name: whoami
+      namespace: default
+      port: 80
+      scheme: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: whoami
+  namespace: default
+spec:
+  ports:
+    - port: 80
+      targetPort: web
+  selector:
+    app: whoami
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: default
+  name: whoami
+  labels:
+    app: whoami
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: whoami
+  template:
+    metadata:
+      labels:
+        app: whoami
+    spec:
+      containers:
+        - name: whoami
+          image: traefik/whoami
+          ports:
+            - name: web
+              containerPort: 80
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"

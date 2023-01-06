@@ -67,8 +67,6 @@ kubectl -n kubernetes-dashboard create token admin-user
 
 ## Installation Traefik Ingress Controller Dashboard
 
-TODO: SSL Einrichten
-
 ```sh
 # Add dashboard entry to HELM chart
 sudo nano /var/lib/rancher/k3s/server/manifests/traefik.yaml
@@ -84,9 +82,16 @@ spec:
     dashboard.enabled: "true"        # <-- add this line
     dashboard.domain: "your domain"  # <-- add this line
 # HELM automatically detects the change and performs all necessary actions
+# create default certificate
+kubectl create secret tls navida.dev --cert=navida.dev/navida.dev.cer --key=navida.dev/navida.dev.key -n kube-system
+kubectl apply -f ingress-traefik/default-certificate.yaml
 # Enable the dashboard route
 kubectl apply -f ingress-traefik/traefik-dashbord.yml
-# The dashboard can now be accessed with http://your domain/dashboard/ (the slash at the end must be included)
+# The dashboard can now be accessed with http://r1.navida.dev/dashboard/ (the slash at the end must be included)
+
+# Sample Application:
+kubectl apply -f ingress-traefik/route-whoami.yaml
+# The Sample can now be accessed with http://r1.navida.dev/whoami/ (the slash at the end must be included)
 ```
 
 ## Measurement temperature, CPU frequency etc

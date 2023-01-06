@@ -1,0 +1,19 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: whoami-ingress-route
+  namespace: default
+spec:  
+  entryPoints:
+    - websecure
+  routes:
+  - match: Host(`r1.navida.dev`) && PathPrefix(`/whoami`)
+    kind: Rule
+    services:
+    - kind: Service
+      name: whoami
+      namespace: default
+      port: 80
+      scheme: http
+
+  
