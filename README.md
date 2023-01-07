@@ -94,7 +94,7 @@ kubectl apply -f ingress-traefik/route-whoami.yaml
 # The Sample can now be accessed with http://r1.navida.dev/whoami/ (the slash at the end must be included)
 ```
 
-## Measurement temperature, CPU frequency etc
+## Simple Measurement temperature, CPU frequency etc
 
 - Load Library: ``sudo apt install libraspberrypi-bin -y``
 - Create``measure.sh``:
@@ -118,6 +118,11 @@ kubectl apply -f ingress-traefik/route-whoami.yaml
       sleep 10
     done
     ```
+
+## Install and configure Prometheus
+
+- Install prometheus with: ``kubectl apply -f prometheus/prometheus-deployment.yaml`` Deployment, the service and the IngressRoute are installed on the CLuster.
+- The Prometheus GUI can then be called with ``https://prometheus.navida.dev/``. Of course, the host url should be adapted to your conditions.
 
 ## [smarter-device-manager](smarter-device-manager.md)
 

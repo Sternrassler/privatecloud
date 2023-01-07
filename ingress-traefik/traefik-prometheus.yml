@@ -2,12 +2,13 @@
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: prometheus
+  name: traefik-metrics
+  namespace: kube-system
 spec:
   entryPoints:
-    - web
+    - websecure
   routes:
-    - match: Host(`r1`) && PathPrefix(`/traefik/metrics`)
+    - match: Host(`r1.navida.dev`) && PathPrefix(`/traefik/metrics`)
       kind: Rule
       services:
         - name: prometheus@internal
