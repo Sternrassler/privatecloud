@@ -25,7 +25,7 @@ On each Raspberry Pi on which K3S is to be installed, the following changes must
 # IPTABLES activate
 sudo iptables -F && sudo update-alternatives --set iptables /usr/sbin/iptables-legacy && sudo update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
 # CGROUP activate
-# dabei die eine exestierende Zeile um folgenden Eintrag am Zeilenende ergänzen
+# add the following entry at the end of the line to the existing line
 #         cgroup_memory=1 cgroup_enable=memory
 sudo nano /boot/cmdline.txt
 
@@ -82,7 +82,8 @@ spec:
     dashboard.enabled: "true"        # <-- add this line
     dashboard.domain: "your domain"  # <-- add this line
 # HELM automatically detects the change and performs all necessary actions
-# create default certificate
+# create default certificate. The certificate is issued to *.navida.dev and the host r1.navida.dev listens to the IP 192.168.0.101
+# You should adjust the certificate and IP according to your environment and requirements.
 kubectl create secret tls navida.dev --cert=navida.dev/navida.dev.cer --key=navida.dev/navida.dev.key -n kube-system
 kubectl apply -f ingress-traefik/default-certificate.yaml
 # Enable the dashboard route
@@ -127,4 +128,3 @@ kubectl apply -f ingress-traefik/route-whoami.yaml
 ## [smarter-device-manager](smarter-device-manager.md)
 
 ## [alternative k8s](https://anthonynsimon.com/blog/kubernetes-cluster-raspberry-pi/)
-
