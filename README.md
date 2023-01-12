@@ -125,6 +125,12 @@ kubectl apply -f ingress-traefik/route-whoami.yaml
 - Install prometheus with: ``kubectl apply -f prometheus/prometheus-deployment.yaml`` Deployment, the service and the IngressRoute are installed on the CLuster.
 - The Prometheus GUI can then be called with ``https://prometheus.navida.dev/``. Of course, the host url should be adapted to your conditions.
 
+## [Install Longhorn Storage Plattform](https://www.rancher.com/products/longhorn)
+
+## [Install Fluentd for Logging](https://www.fluentd.org/)
+
 ## [smarter-device-manager](smarter-device-manager.md)
 
 ## [alternative k8s](https://anthonynsimon.com/blog/kubernetes-cluster-raspberry-pi/)
+
+## [Alterntative Ingress with K8s Gateway API](https://istio.io/latest/blog/2022/getting-started-gtwapi/)
