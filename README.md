@@ -125,6 +125,10 @@ kubectl apply -f ingress-traefik/route-whoami.yaml
 - Install prometheus with: ``kubectl apply -f prometheus/prometheus-deployment.yaml`` Deployment, the service and the IngressRoute are installed on the CLuster.
 - The Prometheus GUI can then be called with ``https://prometheus.navida.dev/``. Of course, the host url should be adapted to your conditions.
 
+## Setup Tailscale VPN (my favorite)
+
+Follow these [instructions](https://tailscale.com/kb/1031/install-linux/).
+
 ## [Install Longhorn Storage Plattform](https://www.rancher.com/products/longhorn)
 
 ## [Install Fluentd for Logging](https://www.fluentd.org/)
