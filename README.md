@@ -129,6 +129,17 @@ kubectl apply -f ingress-traefik/route-whoami.yaml
 
 Follow these [instructions](https://tailscale.com/kb/1031/install-linux/).
 
+## Setup Ansible
+
+- Install Ansible: ``pip3 install ansible``
+- Install Ansible Collection: ``ansible-galaxy collection install community.general``
+- Create Ansible Inventory File: ``.ansible/inventory.yaml``
+- Copy local Public Key to all remote host (replace user and host for each remotehost): ``ssh-copy-id -i ~/.ssh/id_rsa.pub user@remotehost``
+- Test Ansible: ``ansible -i .ansible/inventory.yaml all -m ping -u user``
+- Create Ansible Config File: ``.ansible/ansible.cfg``
+- Create Ansible Playbook: ``.ansible/playbook.yaml``
+- Run Ansible: ``ansible-playbook -i .ansible/inventory.yaml .ansible/playbook.yaml``
+
 ## [Install Longhorn Storage Plattform](https://www.rancher.com/products/longhorn)
 
 ## [Install Fluentd for Logging](https://www.fluentd.org/)
