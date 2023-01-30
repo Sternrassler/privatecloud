@@ -16,4 +16,12 @@ all:
         r2:
         r3:
         r4:
+    k3s_masters:
+      hosts:
+        r1:
+    k3s_workers:
+      hosts:
+        r2:
+        r3:
+        r4:
 
