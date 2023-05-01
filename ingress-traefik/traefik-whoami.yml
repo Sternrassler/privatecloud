@@ -27,7 +27,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-  - match: Host(`r1.navida.dev`) && PathPrefix(`/whoami`)
+  - match: (Host(`r1.navida.dev`) || Host(`r1.donkey-royal.ts.net`)) && PathPrefix(`/whoami`)
     kind: Rule
     services:
     - kind: Service

@@ -1,0 +1,76 @@
+- hosts: k3s_masters
+  gather_facts: false
+  tasks:
+    # - name: Ping my hosts
+    #   ansible.builtin.ping:
+    # - name: Print message
+    #   ansible.builtin.debug:
+    #     msg: Hello Ix Sternrassler
+    # - name: Update all packages to their latest version
+    #   become: true
+    #   become_method: sudo
+    #   ansible.builtin.apt:
+    #     name: "*"
+    #     state: latest
+    #     update_cache: yes
+    # - name: Remove k3s-Node
+    #   become: true
+    #   become_method: sudo
+    #   ansible.builtin.command:
+    #     cmd: /usr/local/bin/k3s-uninstall.sh
+
+    - name: Install k3s-Master-Node      
+      become: true
+      become_method: sudo
+      ansible.builtin.shell: |
+        curl -sfL https://get.k3s.io | sh -
+
+    - name: Get k3s-Master-Token
+      become: true
+      become_method: sudo
+      ansible.builtin.shell: |
+        cat /var/lib/rancher/k3s/server/node-token
+      register: k3s_token
+    - name: Set k3s-Master-Token
+      set_fact: "token={{ k3s_token.stdout_lines[0] }}"
+    # - debug:
+    #     msg: "{{ token }}" 
+
+
+- name: Install k3s-Worker-Node
+  gather_facts: false
+  # hosts: raspberrys
+  hosts: k3s_workers
+  tasks:
+    # - debug:
+    #     msg: "{{ hostvars[groups['k3s_masters'][0]].token }} "
+    - name: Install k3s-Worker-Node
+      become: true
+      become_method: sudo
+      ansible.builtin.shell: |
+        curl -sfL https://get.k3s.io | K3S_URL=https://192.168.0.101:6443 K3S_TOKEN={{ hostvars[groups['k3s_masters'][0]].token }} sh -
+
+- hosts: k3s_masters
+  gather_facts: false
+  tasks:
+    - name: Check k3s-Nodes
+      become: true
+      become_method: sudo
+      ansible.builtin.command:
+        cmd: k3s kubectl get node
+      register: k3s_nodes
+    - debug:
+        var: k3s_nodes.stdout_lines
+    - name: Show Cluster-Config
+      become: true
+      become_method: sudo
+      ansible.builtin.command:
+        cmd: cat /etc/rancher/k3s/k3s.yaml
+      register: k3s_config_list
+    # - name: Set Cluster-Config
+    #   set_fact:
+    #     k3s_config: "{{ k3s_config_list.stdout_lines | join('\n') }}"      
+    - debug:
+        msg: "{{ k3s_config_list.stdout }}"
+
+
