@@ -78,7 +78,6 @@ spec:
     ssl.enabled: "true"
     metrics.prometheus.enabled: "true"
     kubernetes.ingressEndpoint.useDefaultPublishedService: "true"
-    image: "rancher/library-traefik"
     dashboard.enabled: "true"        # <-- add this line
     dashboard.domain: "your domain"  # <-- add this line
 # HELM automatically detects the change and performs all necessary actions
@@ -87,7 +86,7 @@ spec:
 kubectl create secret tls navida.dev --cert=navida.dev/navida.dev.cer --key=navida.dev/navida.dev.key -n kube-system
 kubectl apply -f ingress-traefik/default-certificate.yaml
 # Enable the dashboard route
-kubectl apply -f ingress-traefik/traefik-dashbord.yml
+kubectl apply -f ingress-traefik/traefik-dashboard.yml
 # The dashboard can now be accessed with http://r1.navida.dev/dashboard/ (the slash at the end must be included)
 
 # Sample Application:
@@ -123,13 +122,20 @@ kubectl apply -f ingress-traefik/route-whoami.yaml
 ## Install and configure Prometheus
 
 - Install prometheus with: ``kubectl apply -f prometheus/prometheus-deployment.yaml`` Deployment, the service and the IngressRoute are installed on the CLuster.
+- Tegister DNS entry for Prometheus: ``prometheus.navida.dev``
 - The Prometheus GUI can then be called with ``https://prometheus.navida.dev/``. Of course, the host url should be adapted to your conditions.
+
+## Install and configure Grafana
+
+- Install Grafana with: ``kubectl apply -f grafana/grafana-deployment.yaml`` Deployment, the service and the IngressRoute are installed on the CLuster.
+- Tegister DNS entry for Grafana: ``grafana.navida.dev``
+- The Grafana GUI can then be called with ``https://grafana.navida.dev/``. Of course, the host url should be adapted to your conditions.
 
 ## Setup Tailscale VPN (my favorite)
 
 Follow these [instructions](https://tailscale.com/kb/1031/install-linux/).
 
-## Setup Ansible
+<!-- ## Setup Ansible
 
 - Install Ansible: ``pip3 install ansible``
 - Install Ansible Collection: ``ansible-galaxy collection install community.general``
@@ -138,14 +144,16 @@ Follow these [instructions](https://tailscale.com/kb/1031/install-linux/).
 - Test Ansible: ``ansible -i .ansible/inventory.yaml all -m ping -u user``
 - Create Ansible Config File: ``.ansible/ansible.cfg``
 - Create Ansible Playbook: ``.ansible/playbook.yaml``
-- Run Ansible: ``ansible-playbook -i .ansible/inventory.yaml .ansible/playbook.yaml``
+- Run Ansible: ``ansible-playbook -i .ansible/inventory.yaml .ansible/playbook.yaml`` -->
 
-## [Install Longhorn Storage Plattform](https://www.rancher.com/products/longhorn)
+## Ideas
 
-## [Install Fluentd for Logging](https://www.fluentd.org/)
+### [Install Longhorn Storage Plattform](https://www.rancher.com/products/longhorn) (not yet realized)
 
-## [smarter-device-manager](smarter-device-manager.md)
+### [Install Fluentd for Logging](https://www.fluentd.org/) (not yet realized)
 
-## [alternative k8s](https://anthonynsimon.com/blog/kubernetes-cluster-raspberry-pi/)
+### [smarter-device-manager](smarter-device-manager.md) (not yet realized)
 
-## [Alterntative Ingress with K8s Gateway API](https://istio.io/latest/blog/2022/getting-started-gtwapi/)
+### [alternative k8s](https://anthonynsimon.com/blog/kubernetes-cluster-raspberry-pi/) (not yet realized)
+
+### [Alterntative Ingress with K8s Gateway API](https://istio.io/latest/blog/2022/getting-started-gtwapi/) (not yet realized)
