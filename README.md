@@ -157,3 +157,7 @@ Follow these [instructions](https://tailscale.com/kb/1031/install-linux/).
 ### [alternative k8s](https://anthonynsimon.com/blog/kubernetes-cluster-raspberry-pi/) (not yet realized)
 
 ### [Alterntative Ingress with K8s Gateway API](https://istio.io/latest/blog/2022/getting-started-gtwapi/) (not yet realized)
+
+TODO: Add DNS Record for Tailscale R1-Server as traefik-ts.navida.dev, prometheus-ts.navida.dev, grafana-ts.navida.dev
+TODO: Add Tailscal-DNS to Traefik->dashboard.domain (are multiple DNS entries possible?)
+TODO: Ergänze Traefik-Routen um trafik-ts.navida.dev, prometheus-ts.navida.dev, grafana-ts.navida.dev
