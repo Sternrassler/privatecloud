@@ -87,7 +87,7 @@ kubectl create secret tls navida.dev --cert=navida.dev/navida.dev.cer --key=navi
 kubectl apply -f ingress-traefik/default-certificate.yaml
 # Enable the dashboard route
 kubectl apply -f ingress-traefik/traefik-dashboard.yml
-# The dashboard can now be accessed with http://r1.navida.dev/dashboard/ (the slash at the end must be included)
+# The dashboard can now be accessed with http://traefik.na --cert=vida.dev/ (the slash at the end must be included)
 
 # Sample Application:
 kubectl apply -f ingress-traefik/route-whoami.yaml
@@ -122,7 +122,7 @@ kubectl apply -f ingress-traefik/route-whoami.yaml
 ## Install and configure Prometheus
 
 - Install prometheus with: ``kubectl apply -f prometheus/prometheus-deployment.yaml`` Deployment, the service and the IngressRoute are installed on the CLuster.
-- Tegister DNS entry for Prometheus: ``prometheus.navida.dev``
+- Register DNS entry for Prometheus: ``prometheus.navida.dev``
 - The Prometheus GUI can then be called with ``https://prometheus.navida.dev/``. Of course, the host url should be adapted to your conditions.
 
 ## Install and configure Grafana
@@ -146,7 +146,26 @@ Follow these [instructions](https://tailscale.com/kb/1031/install-linux/).
 - Create Ansible Playbook: ``.ansible/playbook.yaml``
 - Run Ansible: ``ansible-playbook -i .ansible/inventory.yaml .ansible/playbook.yaml`` -->
 
+## Keycloak + Postgres + TLS
+
+- Create Namespace: ``kubectl create namespace keycloak-test``
+- TODO Create Certificates for DNS keycloak.kecloak-test.svc.local or CertificateManager: ``openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout keycloak/certs/tls.key -out keycloak/certs/tls.crt -subj "/CN=kubernets.kubernetes-test.svc.local/O=navida.dev"``
+- Export Keycloak Realm: ``keycloak/bin/standalone.sh -Djboss.socket.binding.port-offset=100 -Dkeycloak.migration.action=export -Dkeycloak.migration.provider=singleFile -Dkeycloak.migration.realmName=navida -Dkeycloak.migration.usersExportStrategy=REALM_FILE -Dkeycloak.migration.file=/tmp/navida-realm.json``
+- Create Secret: ``kubectl create secret generic keycloak-postgres --from-literal=password=yourpassword -n keycloak-test``
+- Create Secret: ``kubectl create secret tls keycloak-navida-dev --cert=keycloak/certs/tls.crt --key=keycloak/certs/tls.key -n keycloak-test``
+- Install Keycloak: ``kubectl apply -f keycloak/keycloak.yaml``
+- Install Postgres: ``kubectl apply -f keycloak/postgres.yaml``
+- Install IngressRoute: ``kubectl apply -f keycloak/ingress.yaml``
+- Register DNS entry for Keycloak: ``keycloak.navida.dev``
+- The Keycloak GUI can then be called with ``https://keycloak.navida.dev/``. Of course, the host url should be adapted to your conditions.
+
 ## Ideas
+
+### [Install Certificates with cert-manager](https://cert-manager.io/docs/installation/kubernetes/) (not yet realized)
+
+- or alternative with [cfssl](https://github.com/cloudflare/cfssl?ref=blog.cloudflare.com) (not yet realized)
+- see also [this](https://blog.cloudflare.com/introducing-cfssl/) (not yet realized)
+- see also [this](https://kubernetes.io/docs/tasks/tls/managing-tls-in-a-cluster ) (not yet realized)
 
 ### [Install Longhorn Storage Plattform](https://www.rancher.com/products/longhorn) (not yet realized)
 
