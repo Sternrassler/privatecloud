@@ -94,6 +94,25 @@ kubectl apply -f ingress-traefik/route-whoami.yaml
 # The Sample can now be accessed with http://r1.navida.dev/whoami/ (the slash at the end must be included)
 ```
 
+## Installing NGinx as an alternative Ingress controller
+  
+  ```sh
+  # Create Namespace
+  kubectl create namespace titc-nginx-ingress
+  # Install NGinx
+  helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+  helm repo update
+  helm install titc-nginx-ingress ingress-nginx/ingress-nginx -n titc-nginx-ingress
+  kubectl get services -n titc-nginx-ingress 
+  # and replace the values <your-service> and <your-service-port> in the file ingress-nginx/nginx-root.yaml
+  # Create default certificate
+  kubectl create secret tls proxy.navida.dev --cert=navida.dev/navida.dev.cer --key=navida.dev/navida.dev.key -n titc-nginx-ingress
+  # Installiere die Ingress-Ressource zur nginx-ingress-route
+  kubectl apply -f ingress-nginx/nginx-root.yaml -n titc-nginx-ingress
+  # # Installiere die Ingress-Ressource zur nginx-ingress-dashboard
+  # kubectl apply -f ingress-nginx/nginx-dashboard.yaml
+
+
 ## Simple Measurement temperature, CPU frequency etc
 
 - Load Library: ``sudo apt install libraspberrypi-bin -y``
@@ -149,15 +168,14 @@ Follow these [instructions](https://tailscale.com/kb/1031/install-linux/).
 ## Keycloak + Postgres + TLS
 
 - Create Namespace: ``kubectl create namespace keycloak-test``
-- TODO Create Certificates for DNS keycloak.kecloak-test.svc.local or CertificateManager: ``openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout keycloak/certs/tls.key -out keycloak/certs/tls.crt -subj "/CN=kubernets.kubernetes-test.svc.local/O=navida.dev"``
-- Export Keycloak Realm: ``keycloak/bin/standalone.sh -Djboss.socket.binding.port-offset=100 -Dkeycloak.migration.action=export -Dkeycloak.migration.provider=singleFile -Dkeycloak.migration.realmName=navida -Dkeycloak.migration.usersExportStrategy=REALM_FILE -Dkeycloak.migration.file=/tmp/navida-realm.json``
-- Create Secret: ``kubectl create secret generic keycloak-postgres --from-literal=password=yourpassword -n keycloak-test``
 - Create Secret: ``kubectl create secret tls keycloak-navida-dev --cert=keycloak/certs/tls.crt --key=keycloak/certs/tls.key -n keycloak-test``
+- Use existing Postgres database and create a user `keycloak` and a schema `keycloak` with the owner `keycloak` and use this as DB for the following installation
 - Install Keycloak: ``kubectl apply -f keycloak/keycloak.yaml``
-- Install Postgres: ``kubectl apply -f keycloak/postgres.yaml``
-- Install IngressRoute: ``kubectl apply -f keycloak/ingress.yaml``
-- Register DNS entry for Keycloak: ``keycloak.navida.dev``
-- The Keycloak GUI can then be called with ``https://keycloak.navida.dev/``. Of course, the host url should be adapted to your conditions.
+- Install Traefik: ``kubectl apply -f keycloak/traefik-keycloak.yaml``
+- The Keycloak GUI can then be called with ``https://r1.navida.dev/keycloak/p1/p2/p3``. Of course, the host url should be adapted to your conditions.
+- TODO Create Certificates for DNS keycloak.kecloak-test.svc.local or CertificateManager for communication betweenTraefik and keycloak service : ``openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout keycloak/certs/tls.key -out keycloak/certs/tls.crt -subj "/CN=kubernets.kubernetes-test.svc.local/O=navida.dev"``
+- TODO Export Keycloak Realm: ``keycloak/bin/standalone.sh -Djboss.socket.binding.port-offset=100 -Dkeycloak.migration.action=export -Dkeycloak.migration.provider=singleFile -Dkeycloak.migration.realmName=navida -Dkeycloak.migration.usersExportStrategy=REALM_FILE -Dkeycloak.migration.file=/tmp/navida-realm.json``
+- TODO Import Keycloak Realm: ``keycloak/bin/standalone.sh -Djboss.socket.binding.port-offset=100 -Dkeycloak.migration.action=import -Dkeycloak.migration.provider=singleFile -Dkeycloak.migration.realmName=navida -Dkeycloak.migration.usersExportStrategy=REALM_FILE -Dkeycloak.migration.file=/tmp/navida-realm.json``
 
 ## Ideas
 
