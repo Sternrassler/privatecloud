@@ -71,8 +71,8 @@ spec:
               value: "true"
             - name: KC_METRICS_ENABLED
               value: "true"
-            - name: KC_LOGLEVEL
-              value: "DEBUG"
+            # - name: KC_LOGLEVEL
+            #   value: "DEBUG"
             # - name: KC_HTTPS_CERTIFICATE_FILE
             #   value: "/etc/x509/https/tls.crt"
             # - name: KC_HTTPS_CERTIFICATE_KEY_FILE
@@ -86,7 +86,7 @@ spec:
             httpGet:
               path: /keycloak/realms/master
               port: 8080
-            initialDelaySeconds: 300
+            initialDelaySeconds: 120
             periodSeconds: 10
           resources:
             requests:
