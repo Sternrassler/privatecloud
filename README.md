@@ -198,3 +198,5 @@ Follow these [instructions](https://tailscale.com/kb/1031/install-linux/).
 TODO: Add DNS Record for Tailscale R1-Server as traefik-ts.navida.dev, prometheus-ts.navida.dev, grafana-ts.navida.dev
 TODO: Add Tailscal-DNS to Traefik->dashboard.domain (are multiple DNS entries possible?)
 TODO: Ergänze Traefik-Routen um trafik-ts.navida.dev, prometheus-ts.navida.dev, grafana-ts.navida.dev
+
+- [k8sgpt](https://docs.k8sgpt.ai/tutorials/content-collection/content-collection/)
