@@ -18,7 +18,7 @@ Dieses Dokument beschreibt die Schritte zur Installation eines Kong-Dashboards i
 Erstellen Sie einen neuen k3d-Cluster ohne Traefik und öffnen Sie die Ports 80 und 443:
 
 ```bash
-k3d cluster create kong --servers 1 --agents 2 --port '80:80@loadbalancer' --port '443:443@loadbalancer' --k3s-arg '--disable=traefik@server:0'
+k3d cluster create kong --servers 1 --agents 3 --port '80:80@loadbalancer' --port '443:443@loadbalancer' --k3s-arg '--disable=traefik@server:0'
 ```
 
 ### 2. PostgreSQL in eigenem Namespace installieren
@@ -73,7 +73,7 @@ INSERT INTO test_table (name) VALUES ('Test Name');
 SELECT * FROM test_table;
 ```
 
-### 4. Kong Ingress im eigenen Namespace installieren
+### 4. Kong Ingress Controller im eigenen Namespace installieren
 
 #### 4.1 Helm-Repository für Kong hinzufügen
 
@@ -84,14 +84,14 @@ helm repo add kong https://charts.konghq.com
 helm repo update
 ```
 
-#### 4.2 Kong installieren
+#### 4.2 Kong Ingress Controller installieren
 
 Installieren Sie Kong in einem neuen Namespace `kong`:
 
 ```bash
 helm install kong kong/kong --namespace kong --create-namespace --set admin.enabled=true --set admin.http.enabled=true
-curl http://localhost # test http, answer no route
-curl -k https://localhost # test https, answer no route
+curl http://localhost # test http, answer no route matched
+curl -k https://localhost # test https, answer no route matched
 ```
 
 ### 5. Kong Ingress testen
@@ -106,6 +106,7 @@ Rufen Sie die IP-Adresse ab und testen Sie die Anwendung:
 
 ```bash
 curl http://localhost/httpbin/get
+curl -k https://localhost/httpbin/get
 ```
 
 Wenn die Ausgabe Informationen über den HTTP-GET-Anruf zurückgibt, funktioniert die Ingress-Konfiguration korrekt.
