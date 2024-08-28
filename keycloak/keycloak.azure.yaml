@@ -1,0 +1,102 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak
+  namespace: theitcrowd
+  labels:
+    app: keycloak
+spec:
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+    # - name: https
+    #   port: 8443
+    #   targetPort: 8443    
+  selector:
+    app: keycloak
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  namespace: theitcrowd
+  labels:
+    app: keycloak
+spec: 
+  replicas: 1 # <- only one instance is functional, more instances will cause problems
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+    spec:
+      containers:
+        - name: keycloak
+          image: quay.io/keycloak/keycloak:21.1.1
+          # volumeMounts:
+          #   - name: tls
+          #     mountPath: /etc/x509/https
+          #     readOnly: true
+          args:
+            [
+              "start",
+              # "--optimized",
+              # "--hostname-url=https://keycloak.navida.dev",
+              "--hostname-url=https://haproxy.navida.dev/keycloak",
+              "--http-relative-path=/keycloak",
+              "--db postgres",
+              # "--db-url=jdbc:postgresql://postgresql.navida.dev:5432/keycloak?sslmode=disable"
+              "--db-url=jdbc:postgresql://postgres.postgresql.svc.cluster.local:5432/keycloak?sslmode=disable"              
+            ]
+          env:
+            # - name: KEYCLOAK_ADMIN
+            #   value: "admin"
+            # - name: KEYCLOAK_ADMIN_PASSWORD
+            #   value: "admin"
+            - name: KC_PROXY
+              value: "edge"
+            - name: KC_DB_USER
+              value: "keycloak"
+            - name: KC_DB_PASSWORD
+              value: "keycloak"
+            - name: QUARKUS_TRANSACTION_ENABLED_RECOVERY
+              value: "true"           
+            - name: KC_TRANSACTION_XA_ENABLED
+              value: "true"
+            - name: KC_HEALTH_ENABLED
+              value: "true"
+            - name: KC_METRICS_ENABLED
+              value: "true"
+            # - name: KC_LOGLEVEL
+            #   value: "DEBUG"
+            # - name: KC_HTTPS_CERTIFICATE_FILE
+            #   value: "/etc/x509/https/tls.crt"
+            # - name: KC_HTTPS_CERTIFICATE_KEY_FILE
+            #   value: "/etc/x509/https/tls.key"
+          ports:
+            # - name: https
+            #   containerPort: 8443
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /keycloak/realms/master
+              port: 8080
+            initialDelaySeconds: 120
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 500m
+              memory: 500Mi
+            limits:
+              cpu: 1000m
+              memory: 1000Mi
+      # volumes:
+      #   - name: tls
+      #     secret:
+      #       secretName: keycloak-navida-dev
+      #       optional: false

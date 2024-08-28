@@ -3,7 +3,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: prometheus-config
-  namespace: monitoring
+  namespace: prometheus
 data:
   prometheus.yml: |-
     # my global config
@@ -42,45 +42,33 @@ data:
           - targets: ["r1.navida.dev"]
 
 ---
-# # Replace the path by /foo
-# apiVersion: traefik.containo.us/v1alpha1
-# kind: Middleware
-# metadata:
-#   name: replace-prometheus-path
-#   namespace: monitoring
-# spec:
-#   replacePath:
-#     path: prometheus
-# ---
+
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
   name: prometheus-ingressroute
-  namespace: monitoring
+  namespace: prometheus
 spec:
   entryPoints:
   - websecure
   tls:
     certResolver: default
   routes:
-  - match: Host(`prometheus.navida.dev`) # && PathPrefix(`/prometheus`)
+  - match: Host(`prometheus.navida.dev`)
     kind: Rule
-    # middlewares:
-    # - name: replacePath  
-    #   namespace: monitoring    
-    #   replacePath:
-    #     path: prometheus
     services:
     - name: prometheus
       port: 9090
-      namespace: monitoring
+      namespace: prometheus
       scheme: http
+
 ---
+
 apiVersion: v1
 kind: Service
 metadata:
   name: prometheus
-  namespace: monitoring
+  namespace: prometheus
 spec:
   type: NodePort
   selector:
@@ -89,12 +77,14 @@ spec:
   - protocol: TCP
     port: 9090
     targetPort: 9090
+
 ---
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: prometheus-deployment
-  namespace: monitoring
+  namespace: prometheus
 spec:
   replicas: 1
   selector:

@@ -7,7 +7,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`r1.navida.dev`) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`))
+    - match: Host(`traefik.navida.dev`) && (PathPrefix(`/`) || PathPrefix(`/api`))
       kind: Rule
       services:
         - name: api@internal

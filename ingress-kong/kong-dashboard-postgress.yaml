@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: konga
+  namespace: kong
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: konga
+  template:
+    metadata:
+      labels:
+        app: konga
+    spec:
+      containers:
+      - name: konga
+        image: pantsel/konga:latest
+        ports:
+        - containerPort: 1337
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: DB_ADAPTER
+          value: "postgres"
+        - name: DB_HOST
+          value: "kong-postgres-postgresql.postgres.svc.cluster.local"
+        - name: DB_USER
+          value: "postgres"
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: kong-db-secret
+              key: POSTGRES_PASSWORD
+        - name: DB_DATABASE
+          value: "postgres"
+        resources:
+          limits:
+            cpu: "0.5"
+            memory: "512Mi"
+          requests:
+            cpu: "0.1"
+            memory: "256Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: konga
+  namespace: kong
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 1337
+    protocol: TCP
+  selector:
+    app: konga
