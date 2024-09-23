@@ -89,6 +89,12 @@ helm upgrade --install argocd argo/argo-cd -n argocd --create-namespace -f argo-
 
 die Helm-Chart-Datei `argo-cd.yaml` enthält die Konfiguration für die Installation von ArgoCD und wurde wi folgt angepasst:
 
+```yaml
+global:
+  # -- Default domain used by all components
+  ## Used for ingresses, certificates, SSO, notifications, etc.
+  domain: localhost
+```
 
 ```yaml
 ## Server properties
@@ -97,47 +103,24 @@ die Helm-Chart-Datei `argo-cd.yaml` enthält die Konfiguration für die Installa
 server.insecure: true
 # -- Value for base href in index.html. Used if Argo CD is running behind reverse proxy under subpath different from /
 server.basehref: /argocd/
-# -- Used if Argo CD is running behind reverse proxy under subpath different from /
-server.rootpath: ''
 ```
 
 und die Ingress-Definition wurde wie folgt angepasst:
 
 ```yaml 
-# Argo CD server ingress configuration
-ingress:
-# -- Enable an ingress resource for the Argo CD server
-enabled: true
-# -- Specific implementation for ingress controller. One of `generic`, `aws` or `gke`
-## Additional configuration might be required in related configuration sections
-controller: generic
-# -- Additional ingress labels
-labels: {}
-# -- Additional ingress annotations
-## Ref: https://argo-cd.readthedocs.io/en/stable/operator-manual/ingress/#option-1-ssl-passthrough
-# annotations: {}
-#   # nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-#   # nginx.ingress.kubernetes.io/ssl-passthrough: "true"
-annotations:
-    konghq.com/strip-path: "true"
-
-# -- Defines which ingress controller will implement the resource
-ingressClassName: "kong"
-
-# -- Argo CD server hostname
-# @default -- `""` (defaults to global.domain)
-hostname: "localhost"
-
-# -- The path to Argo CD server
-path: /argocd
-
-# -- Ingress path type. One of `Exact`, `Prefix` or `ImplementationSpecific`
-pathType: Prefix
-
-# -- Enable TLS configuration for the hostname defined at `server.ingress.hostname`
-## TLS certificate will be retrieved from a TLS secret `argocd-server-tls`
-## You can create this secret via `certificate` or `certificateSecret` option
-tls: false
+server:
+  # Argo CD server ingress configuration
+  ingress:
+    # -- Enable an ingress resource for the Argo CD server
+    enabled: true
+    # -- Additional ingress annotations
+    ## Ref: https://argo-cd.readthedocs.io/en/stable/operator-manual/ingress/#option-1-ssl-passthrough
+    annotations:
+        konghq.com/strip-path: "true"
+    # -- Defines which ingress controller will implement the resource
+    ingressClassName: "kong"
+    # -- The path to Argo CD server
+    path: /argocd
 ```
 
 ## Tools
