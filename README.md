@@ -14,7 +14,24 @@ Erstellen Sie einen neuen k3d-Cluster ohne Traefik und öffnen Sie die Ports 80 
 ```bash
 k3d cluster create kong --servers 1 --agents 3 --port '80:80@loadbalancer' --port '443:443@loadbalancer' --k3s-arg '--disable=traefik@server:0'
 ```
+## K3D Image Regitry
 
+Hinzufügen einer lokaler Image Registry in K3D.
+
+```bash
+# falls der Port 5000 bereits besetzt ist nutze einen anderen
+k3d registry create k3dregistry.localhost --port 6000
+# auflisten aller Registrys
+k3d registry list
+# verwenden der lokalen Registry
+docker pull nginx:latest
+docker tag nginx:latest k3dregistry.localhost:6000/nginx:latest
+docker push k3dregistry.localhost:6000/nginx:latest
+# cli für Nicht-Docker-Repos instalieren
+brew install reg
+# nicht SSL erzwingen mit -f
+reg ls -f k3dregistry.localhost:6000
+````
 ## Kong Ingress Controller
 
 ### Helm-Repository für Kong hinzufügen
