@@ -14,7 +14,7 @@ Erstellen Sie einen neuen k3d-Cluster ohne Traefik und öffnen Sie die Ports 80 
 ```bash
 k3d cluster create kong --servers 1 --agents 3 --port '80:80@loadbalancer' --port '443:443@loadbalancer' --k3s-arg '--disable=traefik@server:0'
 ```
-## K3D Image Regitry
+## K3D Image Registry
 
 Hinzufügen einer lokaler Image Registry in K3D.
 
@@ -23,13 +23,13 @@ Hinzufügen einer lokaler Image Registry in K3D.
 k3d registry create k3dregistry.localhost --port 6000
 # auflisten aller Registrys
 k3d registry list
-# verwenden der lokalen Registry
+# verwenden und testen der lokalen Registry
 docker pull nginx:latest
 docker tag nginx:latest k3dregistry.localhost:6000/nginx:latest
 docker push k3dregistry.localhost:6000/nginx:latest
-# cli für Nicht-Docker-Repos instalieren
+# cli für Nicht-Docker-Repos installieren
 brew install reg
-# nicht SSL erzwingen mit -f
+# Verbindung ohne SSL mit -f erzwingen
 reg ls -f k3dregistry.localhost:6000
 ````
 ## Kong Ingress Controller
@@ -102,43 +102,12 @@ helm repo add argo https://argoproj.github.io/argo-helm
 helm repo update
 # installiere ArgoCD
 helm upgrade --install argocd argo/argo-cd -n argocd --create-namespace -f argo-cd/argo-cd.yaml
+# Abfrage Passwort für admin
+kubectl -n argocd get secret argocd-initial-admin-secret \
+  -o jsonpath="{.data.password}" | base64 -d; echo
 ```
 
-die Helm-Chart-Datei `argo-cd.yaml` enthält die Konfiguration für die Installation von ArgoCD und wurde wi folgt angepasst:
-
-```yaml
-global:
-  # -- Default domain used by all components
-  ## Used for ingresses, certificates, SSO, notifications, etc.
-  domain: localhost
-```
-
-```yaml
-## Server properties
-# -- Run server without TLS
-## NOTE: This value should be set when you generate params by other means as it changes ports used by ingress template.
-server.insecure: true
-# -- Value for base href in index.html. Used if Argo CD is running behind reverse proxy under subpath different from /
-server.basehref: /argocd/
-```
-
-und die Ingress-Definition wurde wie folgt angepasst:
-
-```yaml 
-server:
-  # Argo CD server ingress configuration
-  ingress:
-    # -- Enable an ingress resource for the Argo CD server
-    enabled: true
-    # -- Additional ingress annotations
-    ## Ref: https://argo-cd.readthedocs.io/en/stable/operator-manual/ingress/#option-1-ssl-passthrough
-    annotations:
-        konghq.com/strip-path: "true"
-    # -- Defines which ingress controller will implement the resource
-    ingressClassName: "kong"
-    # -- The path to Argo CD server
-    path: /argocd
-```
+die Helm-Chart-Datei `argo-cd.yaml` enthält die Konfiguration für die Installation von ArgoCD.
 
 ## Tools
 

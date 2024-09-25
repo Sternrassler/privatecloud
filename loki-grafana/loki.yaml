@@ -48,9 +48,15 @@ grafana:
   ingress:
     enabled: true
     ingressClassName: kong
-    path: /
+    path: /grafana
     hosts:
       - localhost
+    annotations:
+      konghq.com/protocols: "https"
+  grafana.ini:
+    server:
+      root_url: "https://%(domain)s/grafana/"
+      serve_from_sub_path: true
 
 prometheus:
   enabled: false
