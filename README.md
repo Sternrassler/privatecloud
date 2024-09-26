@@ -58,7 +58,7 @@ curl -k https://localhost # test https, answer no route
 Erstellen Sie eine Beispiel-Anwendung im Namespace `default`:
 
 ```bash
-kubectl apply -f samples/httpbin.yaml
+kubectl apply -f samples/httpbin-on-kong.yaml
 ```
 
 Testen Sie die Anwendung:
@@ -68,6 +68,30 @@ curl http://localhost/httpbin/get
 ```
 
 Wenn die Ausgabe Informationen über den HTTP-GET-Anruf zurückgibt, funktioniert die Ingress-Konfiguration korrekt.
+
+## NGINX Ingress Controller parallel zu Kong installieren
+
+```bash
+# erweitern Ports K3D Loadbalancer
+k3d cluster edit kong --port-add '8080:8080@loadbalancer'
+k3d cluster edit kong --port-add '8443:8443@loadbalancer'
+# installieren NGINX Ingress Controller
+kubectl create namespace nginx-ingress
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo update
+helm install nginx-ingress ingress-nginx/ingress-nginx \
+  --namespace nginx-ingress \
+  --set controller.ingressClassResource.name=nginx \
+  --set controller.service.type=LoadBalancer \
+  --set controller.service.ports.http=8080 \
+  --set controller.service.ports.https=8443
+# testen der Installation
+curl http://localhost:8080 # test http, answer 404
+curl -k https://localhost:8443 # test https, answer 404
+kubectl apply -f samples/httpbin-on-nginx.yaml
+curl http://localhost:8080/httpbin/get
+curl -k https://localhost:8443/httpbin/get
+```
 
 ## Grafana Loki
 
